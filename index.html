@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+    <title>Lake catchments</title>
+</head>
+<body>
+    <div id="mapid"></div>
+    <script type="text/javascript">
+        var map = L.map('mapid').setView([62, -6.8], 8);
+
+        //L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //maxZoom: 19,
+        //attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+        //}).addTo(map);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+	    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        }).addTo(map);
+
+        L.control.scale().addTo(map);
+
+        lake_style = {"fillColor": "#63C5DA", "color": "#0492C2"}
+
+        catch_style = {"fillColor": "#AF69EF", "color": "#A45EE5"}
+
+        var featureGroup = L.featureGroup();
+
+        var lakes = new L.GeoJSON.AJAX("fo_lakes.geojson", 
+        {
+            onEachFeature: function (lake, layer){
+                layer.bindPopup(lake.properties.label);
+                layer.on("click",function(click){
+                    
+                    var catchments = new L.GeoJSON.AJAX("fo_catchments.geojson",
+                    {
+                        filter: function(catchment){if(catchment.properties.lake_feature_id == lake.properties.feature_id) return true},
+                        style: catch_style,
+                        onEachFeature: function(catchment, layer){layer.bindPopup(catchment.properties.label)}
+                    });
+                    
+                    featureGroup.addLayer(catchments);
+                    featureGroup.addTo(map);
+                });
+            },
+
+            style: lake_style
+        });
+        lakes.addTo(map);
+
+        map.on('click', function(e){
+            featureGroup.clearLayers();
+        });
+
+        L.Control.textbox = L.Control.extend({
+            onAdd: function(map) {
+                
+            var text = L.DomUtil.create('div');
+            text.id = "info_text";
+            text.innerHTML = "<b>Faroe Islands</b><br><b>Lakes and catchments</b><br><em>Click a lake to show catchment</em><br><em>Click a catchment or lake for info</em><br><br>Data from the Faroese Environment <br> Agency, Umhvørvisstovan:<br>DSM 2017, August 2023<br>Lendiskort, August 2023<br><a href='https://www.foroyakort.fo/''>https://www.foroyakort.fo/</a>";
+            return text;
+            },
+
+            onRemove: function(map) {}
+        });
+        L.control.textbox = function(opts) { return new L.Control.textbox(opts);}
+        L.control.textbox({ position: 'topright' }).addTo(map);
+    </script>
+</body>
+</html>

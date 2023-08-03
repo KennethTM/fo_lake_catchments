@@ -1,1 +1,1 @@
-# fo_lake_catchments
+# Faroe Islands lake catchments
