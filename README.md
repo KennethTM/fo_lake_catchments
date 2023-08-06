@@ -8,9 +8,7 @@ Data can be explored on an interactive online map hosted with GitHub pages.
 
 [Interactive online map](https://kennethtm.github.io/fo_lake_catchments/)
 
-[Download lake data](https://github.com/KennethTM/fo_lake_catchments/blob/main/fo_lakes.geojson)
-
-[Download catchment data](https://github.com/KennethTM/fo_lake_catchments/blob/main/fo_lakes.geojson)
+Lake and catchment GIS vector files are available for download as GeoJSON files from this repo.
 
 ## Data
 
