@@ -80,9 +80,8 @@ gdalinfo("arcticdem/dem.vrt")
 #5316 is used for vector data
 #for arcticdem vertical reference is height above the WGS84 ellipsoid
 #Must to adjusted to geoid (orthometric height prior to use)
+#egm08_25.gtx can be downloaded from osgeo github and moved to sf proj
 
-#egm08_25.gtx downloaded from osgeo github and moved to sf proj
-#Negative værdier forekommer - anden geoid model?
 gdalwarp("arcticdem/dem.vrt",
          "data/dem_20m.tif",
          s_srs = "EPSG:3413",
