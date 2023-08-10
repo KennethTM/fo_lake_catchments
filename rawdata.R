@@ -7,6 +7,15 @@ library(mapview);library(gdalUtilities);library(osmdata)
 gdalinfo("foroyakort/FO_DSM_2017_FOTM_2M.tif")
 dem <- rast("foroyakort/FO_DSM_2017_FOTM_2M.tif")
 
+#Warp subsampled DEM for figures
+gdalwarp("foroyakort/FO_DSM_2017_FOTM_2M.tif",
+         "data/dem_50m.tif",
+         tr=c(50, 50),
+         r="bilinear",
+         co="COMPRESS=LZW",
+         t_srs = "EPSG:32629",
+         overwrite = TRUE)
+
 #Slope map
 slope <- terrain(dem, v="slope", unit="degrees", filename="data/slope.tif")
 
@@ -40,8 +49,7 @@ water_islands <- water |>
   select(feature_id, name)
 
 river_feature_ids <- c(301, 34, 6923, 6061, 6923, 7092, 772, 714, 7091, 6170, 7090, 41, 6166)
-other_feature_ids <- c(559, 561, 780, 809, 787, 835, 843) ###check for more near ports
-
+other_feature_ids <- c(559, 561, 780, 809, 787, 835, 843)
 lakes <- water |> 
   left_join(water_islands) |> 
   filter(!is.na(name),
