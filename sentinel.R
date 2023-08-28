@@ -23,6 +23,9 @@ writeRaster(tci_mask, "data/sentinel_tci.tif", datatype="INT1U", NAflag=NA, over
 writeRaster(tci_mask, "data/sentinel_tci.png", datatype="INT1U", NAflag=NA, overwrite=TRUE)
 writeRaster(tci_mask, "data/sentinel_tci.jpeg", filetype="JPEG", datatype="INT1U", NAflag=NA, overwrite=TRUE)
 
+#Create small version
+#gdal_translate("data/sentinel_tci.tif", "data/sentinel_tci_small.jpg", outsize=c("50%", "50%"), a_nodata="none")
+
 #NDVI
 QUANTIFICATION_VALUE <- 10000
 ADD_BOA_OFFSET <- -1000
