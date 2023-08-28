@@ -128,6 +128,7 @@ lake_catchments_nolake_clean <- lake_catchments_nolake %>%
 #Extract mean, median, min, max elevation and slope for catchments
 dem <- rast("foroyakort/FO_DSM_2017_FOTM_2M.tif")
 slope <- rast("data/slope.tif")
+ndvi <- rast("data/sentinel_ndvi.tif")
 
 stat_funs <- c("min", "mean", "median", "max")
 
@@ -137,39 +138,35 @@ names(dem_stats) <- paste0(stat_funs, "_elevation_m")
 slope_stats <- exact_extract(slope, lake_catchments_nolake_clean, fun=stat_funs)
 names(slope_stats) <- paste0(stat_funs, "_slope_degrees")
 
+ndvi_stats <- exact_extract(ndvi, lake_catchments_nolake_clean, fun=stat_funs)
+names(ndvi_stats) <- paste0(stat_funs, "_ndvi")
+
 lake_catchments_feats <- lake_catchments_nolake_clean |> 
   mutate(area_m2 = as.numeric(st_area(x))) |> 
   bind_cols(dem_stats, 
-            slope_stats) 
+            slope_stats,
+            ndvi_stats) 
 
 lake_catchments_feats |> 
   st_write("data/catchments_simple_nolake.sqlite", delete_layer = TRUE)
 
 #Format label for popups and write to geojson
 lakes |> 
-  mutate(label = paste0("<b>Lake</b>",
-                        "<br>",
-                        "Area: ", round(area_m2, 0), " m<sup>2</sup>",
-                        "<br>",
-                        "Shoreline: ", round(shoreline_m, 0), " m",
-                        "<br>",
-                        "Elevation: ", round(elevation_m, 0), " m")) |> 
-  select(feature_id, label) |> 
-  st_transform(4326) |> 
-  st_write("fo_lakes.geojson", delete_dsn = TRUE)
+  mutate(area_m2 = sprintf(area_m2, fmt = "%0.0f"),
+         shoreline_m = sprintf(shoreline_m, fmt = "%0.0f"),
+         elevation_m = sprintf(elevation_m, fmt = "%0.0f")) |> 
+  select(feature_id, area_m2, shoreline_m, elevation_m) |> 
+  st_transform(4326) |>
+  st_write("fo_lakes.geojson", delete_dsn = TRUE, layer_options="COORDINATE_PRECISION=5")
 
 lake_catchments_feats |> 
-  mutate(label = paste0("<b>Catchment</b>",
-                        "<br>",
-                        "Area: ", round(area_m2, 0), " m<sup>2</sup>",
-                        "<br>",
-                        "Minimum elevation: ", round(min_elevation_m, 0), " m",
-                        "<br>",
-                        "Mean elevation: ", round(mean_elevation_m, 0), " m",
-                        "<br>",
-                        "Maximum elevation: ", round(max_elevation_m, 0), " m",
-                        "<br>",
-                        "Mean slope: ", round(mean_slope_degrees, 0), " %")) |> 
-  select(lake_feature_id, label) |>
+  mutate(area_m2 = sprintf(area_m2, fmt = "%0.0f"),
+         min_elevation_m = sprintf(min_elevation_m, fmt = "%0.0f"),
+         mean_elevation_m = sprintf(mean_elevation_m, fmt = "%0.0f"),
+         max_elevation_m = sprintf(max_elevation_m, fmt = "%0.0f"),
+         mean_slope_degrees = sprintf(mean_slope_degrees, fmt = "%0.1f"),
+         mean_ndvi = sprintf(mean_ndvi, fmt = "%0.2f")) |> 
+  select(lake_feature_id, area_m2, min_elevation_m, mean_elevation_m, max_elevation_m,
+         mean_slope_degrees, mean_ndvi) |> 
   st_transform(4326) |> 
-  st_write("fo_catchments.geojson", delete_dsn = TRUE)
+  st_write("fo_catchments.geojson", delete_dsn = TRUE, layer_options="COORDINATE_PRECISION=5")
