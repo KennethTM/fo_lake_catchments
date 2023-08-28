@@ -1,5 +1,9 @@
 # Faroe Islands lake catchments
 
+![Sentinel 2 image](https://github.com/KennethTM/fo_lake_catchments/blob/main/data/sentinel_tci_small.jpg)
+
+*Composite Sentinel 2 imagery captured June 12, 2023. Contains modified Copernicus Sentinel data 2023*
+
 Catchments/watershed/upslope area for all inland lakes on Faroe Islands based on a 2 meter digital elevation model. 
 
 ## Online map
